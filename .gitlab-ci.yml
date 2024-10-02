@@ -1,0 +1,72 @@
+stages:
+  - security_check
+  - code_quality
+  - tests
+
+flake8-lint:
+  stage: code_quality
+  image: python:3.12
+  before_script:
+    - pip install flake8
+  allow_failure: false
+  script:
+    - flake8 .
+
+bandit-lint:
+  stage: security_check
+  image: python:3.12
+  before_script:
+    - pip install bandit
+  allow_failure: false
+  script:
+    - bandit -r ./event_gate/profiles -ll
+
+safety-check:
+  stage: security_check
+  image: python:3.12
+  before_script:
+    - pip install safety
+  allow_failure: false
+  script:
+    - safety check -r ./event_gate/requirements.txt
+
+.test_template:
+  stage: tests
+  image: python:3.12
+  allow_failure: false
+  variables:
+    DB_NAME: "event_gate_test"
+    DB_USER: "root"
+    DB_PASSWORD: ""
+    DB_HOST: "db"
+    DB_PORT: "3306"
+  services:
+    - name: mysql:latest
+      alias: db
+      variables:
+        MYSQL_DATABASE: $DB_NAME
+        MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+  before_script:
+    - apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev gcc default-mysql-client
+    - pip install --upgrade pip
+    - pip install -r ./event_gate/requirements.txt
+    - |
+      until mysqladmin ping -h "$DB_HOST" --silent; do
+        echo "Waiting for MySQL to be ready..."
+        sleep 2
+      done
+    - python ./event_gate/manage.py migrate
+    - python ./event_gate/manage.py createcachetable
+  after_script:
+    - echo "Tests completed successfully"
+
+profiles_unit_test:
+  extends: .test_template
+  script:
+    - python ./event_gate/manage.py test ./event_gate/profiles/tests/unit/
+
+profiles_functional_test:
+  extends: .test_template
+  script:
+    - python ./event_gate/manage.py test ./event_gate/profiles/tests/functional/
