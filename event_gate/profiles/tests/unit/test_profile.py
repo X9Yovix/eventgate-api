@@ -2,6 +2,7 @@ from django.test import TestCase
 from profiles.models import Profile
 from datetime import date
 
+
 class ProfileTestCase(TestCase):
     def setUp(self):
         """Create a test profile"""
