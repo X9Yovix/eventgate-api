@@ -24,6 +24,7 @@ flake8-lint:
     MYSQL_USER: root
     MYSQL_PASSWORD: root_password
   before_script:
+    - apt-get update && apt-get install -y default-mysql-client
     - pip install -r ./event_gate/requirements.txt
     - |
       until mysql -h db -u root -proot_password -e 'SELECT 1'; do
