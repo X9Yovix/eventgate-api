@@ -30,8 +30,13 @@ flake8-lint:
     DB_PORT: 3306
   before_script:
     - pip install -r ./event_gate/requirements.txt
-    - sleep 10 
+    - |
+      while ! mysqladmin ping -h db --silent; do
+        echo "Waiting for database to be ready..."
+        sleep 2
+      done
     - python ./event_gate/manage.py migrate
+
 
 profiles_unit_test:
   extends: .test_template
