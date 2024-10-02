@@ -23,8 +23,14 @@ flake8-lint:
     MYSQL_DATABASE: event_gate_test
     MYSQL_USER: root
     MYSQL_PASSWORD: root_password
+    DB_NAME: event_gate_test
+    DB_USER: root
+    DB_PASSWORD: root_password
+    DB_HOST: db
+    DB_PORT: 3306
   before_script:
     - pip install -r ./event_gate/requirements.txt
+    - sleep 10 
     - python ./event_gate/manage.py migrate
 
 profiles_unit_test:
