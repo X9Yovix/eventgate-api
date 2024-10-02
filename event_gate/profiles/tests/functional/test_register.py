@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from profiles.models import Profile
 
+
 class RegistrationTests(TestCase):
 
     def test_empty_fields(self):
@@ -39,7 +40,7 @@ class RegistrationTests(TestCase):
             'last_name': 'Doe'
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
     def test_same_password_as_email(self):
         """Test registration with invalid password"""
         response = self.client.post(reverse('register'), data={
@@ -49,7 +50,7 @@ class RegistrationTests(TestCase):
             'last_name': 'Doe'
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
     def test_valid_registration(self):
         """Test valid registration"""
         response = self.client.post(reverse('register'), data={
@@ -59,9 +60,8 @@ class RegistrationTests(TestCase):
             'last_name': 'Doe',
             'birth_date': '1990-01-01',
             'phone_number': '1234567890',
-            'gender':'male',
-            'bio':'I am a test user'
+            'gender': 'male',
+            'bio': 'I am a test user'
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Profile.objects.filter(email='john.doe@example.com').exists())
-

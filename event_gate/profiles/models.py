@@ -1,6 +1,7 @@
 from django.db import models
 from event_gate.models import TimeStampedModel
 
+
 class Profile(TimeStampedModel):
     first_name = models.CharField(max_length=50, blank=False, null=False)
     last_name = models.CharField(max_length=50, blank=False, null=False)
