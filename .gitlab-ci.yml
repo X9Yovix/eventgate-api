@@ -25,7 +25,6 @@ flake8-lint:
     MYSQL_PASSWORD: root_password
   before_script:
     - pip install -r ./event_gate/requirements.txt
-    - dockerize -wait tcp://db:3306 -timeout 30s
     - python ./event_gate/manage.py migrate
 
 profiles_unit_test:
