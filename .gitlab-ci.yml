@@ -24,7 +24,7 @@ flake8-lint:
     MYSQL_USER: root
     MYSQL_PASSWORD: root_password
   before_script:
-    - pip install -r requirements.txt
+    - pip install -r ./event_gate/requirements.txt
     - python manage.py wait_for_db
     - python manage.py migrate
 
