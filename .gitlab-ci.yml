@@ -29,11 +29,11 @@ flake8-lint:
     DB_HOST: db
     DB_PORT: 3306
   before_script:
-    - echo "DB_NAME: $DB_NAME"
-    - echo "DB_USER: $DB_USER"
-    - echo "DB_PASSWORD: $DB_PASSWORD"
-    - echo "DB_HOST: $DB_HOST"
-    - echo "DB_PORT: $DB_PORT"
+    - echo $DB_NAME
+    - echo $DB_USER
+    - echo $DB_PASSWORD
+    - echo $DB_HOST
+    - echo $DB_PORT
     - pip install -r ./event_gate/requirements.txt
     - python ./event_gate/manage.py migrate
 
