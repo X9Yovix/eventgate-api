@@ -31,9 +31,9 @@ flake8-lint:
 profiles_unit_test:
   extends: .test_template
   script:
-    - python manage.py test ./profiles/tests/unit/
+    - python manage.py test ./event_gate/profiles/tests/unit/
 
 profiles_functional_test:
   extends: .test_template
   script:
-    - python manage.py test ./profiles/tests/functional/
+    - python manage.py test ./event_gate/profiles/tests/functional/
