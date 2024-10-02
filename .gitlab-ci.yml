@@ -25,15 +25,15 @@ flake8-lint:
     MYSQL_PASSWORD: root_password
   before_script:
     - pip install -r ./event_gate/requirements.txt
-    - python manage.py wait_for_db
-    - python manage.py migrate
+    - python ./event_gate/manage.py wait_for_db
+    - python ./event_gate/manage.py migrate
 
 profiles_unit_test:
   extends: .test_template
   script:
-    - python manage.py test ./event_gate/profiles/tests/unit/
+    - python ./event_gate/manage.py test ./event_gate/profiles/tests/unit/
 
 profiles_functional_test:
   extends: .test_template
   script:
-    - python manage.py test ./event_gate/profiles/tests/functional/
+    - python ./event_gate/manage.py test ./event_gate/profiles/tests/functional/
