@@ -24,9 +24,6 @@ flake8-lint:
     MYSQL_USER: root
     MYSQL_PASSWORD: root_password
   before_script:
-    - apt-get update && apt-get install -y wget
-    - wget https://github.com/jwilder/dockerize/releases/latest/download/dockerize-linux-amd64-v0.6.1.tar.gz
-    - tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.6.1.tar.gz
     - pip install -r ./event_gate/requirements.txt
     - dockerize -wait tcp://db:3306 -timeout 30s
     - python ./event_gate/manage.py migrate
