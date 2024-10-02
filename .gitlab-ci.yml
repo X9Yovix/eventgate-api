@@ -3,8 +3,6 @@ stages:
   - tests
 
 flake8-lint:
-  except:
-    - master   
   stage: code_quality
   image: python:3.12
   before_script:
@@ -32,11 +30,6 @@ flake8-lint:
     DB_PORT: 3306
   before_script:
     - pip install -r ./event_gate/requirements.txt
-    - |
-      while ! mysql -h db -u root -p root_password -e "SELECT 1"; do
-        echo "Waiting for database to be ready..."
-        sleep 2
-      done
     - python ./event_gate/manage.py migrate
 
 profiles_unit_test:
