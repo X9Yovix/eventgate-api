@@ -1,0 +1,39 @@
+stages:
+  - code_quality
+  - tests
+
+flake8-lint:
+  stage: code_quality
+  image: python:3.12
+  before_script:
+    - pip install flake8
+  allow_failure: false
+  script:
+    - flake8 .
+
+.test_template:
+  stage: tests
+  image: python:3.12
+  allow_failure: false
+  services:
+    - name: mysql:8.0
+      alias: db
+  variables:
+    MYSQL_ROOT_PASSWORD: root_password
+    MYSQL_DATABASE: event_gate_test
+    MYSQL_USER: root
+    MYSQL_PASSWORD: root_password
+  before_script:
+    - pip install -r requirements.txt
+    - python manage.py wait_for_db
+    - python manage.py migrate
+
+profiles_unit_test:
+  extends: .test_template
+  script:
+    - python manage.py test ./profiles/tests/unit/
+
+profiles_functional_test:
+  extends: .test_template
+  script:
+    - python manage.py test ./profiles/tests/functional/
