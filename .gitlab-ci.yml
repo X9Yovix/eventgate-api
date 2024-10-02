@@ -25,7 +25,11 @@ flake8-lint:
     MYSQL_PASSWORD: root_password
   before_script:
     - pip install -r ./event_gate/requirements.txt
-    - python ./event_gate/manage.py wait_for_db
+    - |
+      until mysql -h db -u root -proot_password -e 'SELECT 1'; do
+        echo "Waiting for MySQL..."
+        sleep 2
+      done
     - python ./event_gate/manage.py migrate
 
 profiles_unit_test:
