@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from profiles.services import create_profile
+from profiles.services import register_service
 from django.contrib.auth.models import User
 
 
@@ -13,7 +13,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        return create_profile(validated_data)
+        return register_service(validated_data)
 
 
 class LoginSerializer(serializers.Serializer):

@@ -7,7 +7,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-def create_profile(validated_data):
+def register_service(validated_data):
     try:
         user = User.objects.create_user(
             first_name=validated_data.get('first_name'),
@@ -32,7 +32,7 @@ def create_profile(validated_data):
         raise ValueError(f"Error creating user or profile: {str(e)}")
 
 
-def login(validated_data):
+def login_service(validated_data):
     username = validated_data.get('username')
     password = validated_data.get('password')
 

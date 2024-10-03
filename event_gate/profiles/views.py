@@ -4,7 +4,7 @@ from rest_framework import status
 from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer
 from profiles.services import verify_opt_service, resend_otp_service
 from rest_framework_simplejwt.tokens import RefreshToken
-from profiles.services import login
+from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
@@ -63,7 +63,7 @@ def login_request(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            user = login(serializer.validated_data)
+            user = login_service(serializer.validated_data)
             refresh = RefreshToken.for_user(user)
 
             return Response({
