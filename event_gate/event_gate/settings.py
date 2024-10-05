@@ -155,7 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # added settings
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
@@ -180,3 +180,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+CORS_ALLOWED_ORIGINS = [
+    os.getenv('IONIC_WEB_URL', 'http://localhost:8100'),
+]

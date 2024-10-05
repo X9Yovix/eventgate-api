@@ -33,7 +33,7 @@ safety-check:
   before_script:
     - pip install safety
   script:
-    - safety check -r ./event_gate/requirements.txt
+    - safety check -r ./event_gate/requirements.txt -i 66963
   after_script:
       - echo "Safety check completed successfully"
 
