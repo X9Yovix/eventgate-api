@@ -28,3 +28,7 @@ class VerifyOTPSerializer(serializers.Serializer):
 
 class ResendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class CancelAccountSerializer(serializers.Serializer):
+    email = serializers.EmailField()

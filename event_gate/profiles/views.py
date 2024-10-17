@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer
-from profiles.services import verify_opt_service, resend_otp_service
+from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer, CancelAccountSerializer
+from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service
 from rest_framework_simplejwt.tokens import RefreshToken
 from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated
@@ -25,7 +25,7 @@ def register_request(request):
                 }
             }, status=status.HTTP_201_CREATED)
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -39,7 +39,7 @@ def verify_otp_request(request):
             return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
 
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -53,7 +53,21 @@ def resend_otp_request(request):
             resend_otp_service(serializer.validated_data)
             return Response({'message': 'New OTP has been sent'}, status=status.HTTP_200_OK)
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def cancel_account_request(request):
+    serializer = CancelAccountSerializer(data=request.data)
+
+    if serializer.is_valid():
+        try:
+            cancel_account_service(serializer.validated_data)
+            return Response({'message': 'Account creation has been canceled'}, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,7 +95,7 @@ def login_request(request):
             }, status=status.HTTP_200_OK)
 
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -117,4 +131,4 @@ def logout_request(request):
         return Response({'message': 'Logout successful'}, status=status.HTTP_205_RESET_CONTENT)
 
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)

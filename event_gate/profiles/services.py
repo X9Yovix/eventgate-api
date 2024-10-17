@@ -15,6 +15,7 @@ def register_service(validated_data):
             username=validated_data.get('username'),
             email=validated_data.get('email'),
             password=validated_data.get('password'),
+            is_active=False,
         )
         profile = Profile.objects.create(user=user)
         generate_otp(profile)
@@ -39,14 +40,14 @@ def login_service(validated_data):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        raise ValueError("User with this username does not exist")
+        raise ValueError(["User with this username does not exist"])
 
     if not user.check_password(password):
         raise ValueError("Incorrect password")
 
     profile = Profile.objects.get(user=user)
     if not profile.is_verified:
-        raise ValueError("Email is not verified")
+        raise ValueError(["Email is not verified"])
 
     return user
 
@@ -58,20 +59,22 @@ def verify_opt_service(validated_data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise ValueError("User with this email does not exist")
+        raise ValueError(["User with this email does not exist"])
 
     profile = user.profile
 
     if profile.is_verified:
-        raise ValueError("Email is already verified")
+        raise ValueError(["Email is already verified"])
 
     if profile.otp_code == otp_code and timezone.now() < profile.otp_expiration:
         profile.is_verified = True
         profile.otp_code = None
         profile.save()
+        user.is_active = True
+        user.save()
         return True
 
-    raise ValueError("Invalid OTP or OTP has expired")
+    raise ValueError(["Invalid OTP or OTP has expired"])
 
 
 def resend_otp_service(validated_data):
@@ -80,12 +83,12 @@ def resend_otp_service(validated_data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise ValueError("User with this email does not exist")
+        raise ValueError(["User with this email does not exist"])
 
     profile = user.profile
 
     if profile.is_verified:
-        raise ValueError("Email is already verified")
+        raise ValueError(["Email is already verified"])
 
     generate_otp(profile)
 
@@ -93,7 +96,7 @@ def resend_otp_service(validated_data):
         'Your Verification Code',
         f'Your OTP code is {profile.otp_code}. It is valid for 10 minutes.',
         settings.DEFAULT_FROM_EMAIL,
-        [profile.user.email],
+        [user.email],
         fail_silently=False,
     )
 
@@ -102,3 +105,17 @@ def generate_otp(profile):
     profile.otp_code = str(uuid.uuid4().int)[:6]
     profile.otp_expiration = timezone.now() + timedelta(minutes=10)
     profile.save()
+
+
+def cancel_account_service(validated_data):
+    email = validated_data.get('email')
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        raise ValueError(["User with this email does not exist"])
+
+    if user.is_active:
+        raise ValueError(["Account is already active"])
+
+    user.delete()
