@@ -6,7 +6,9 @@ from profiles.views import (
     resend_otp_request,
     cancel_account_request,
     logout_request,
-    protected_request
+    protected_request,
+    skip_complete_profile_request,
+    complete_profile_request
 )
 
 urlpatterns = [
@@ -16,5 +18,7 @@ urlpatterns = [
     path('cancel-account', cancel_account_request, name='cancel_account_request'),
     path('login', login_request, name='login_request'),
     path('logout', logout_request, name='logout_request'),
+    path('skip-complete-profile', skip_complete_profile_request, name='skip_complete_profile_request'),
+    path('complete-profile', complete_profile_request, name='complete_profile_request'),
     path('protected', protected_request, name='protected_route_request'),
 ]

@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer, CancelAccountSerializer
-from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service
+from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer, CancelAccountSerializer, CompleteProfileSerializer
+from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service, skip_complete_profile_service, complete_profile_service
 from rest_framework_simplejwt.tokens import RefreshToken
 from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated
@@ -77,7 +77,7 @@ def login_request(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            user = login_service(serializer.validated_data)
+            user, profile = login_service(serializer.validated_data)
             refresh = RefreshToken.for_user(user)
 
             return Response({
@@ -87,6 +87,15 @@ def login_request(request):
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'email': user.email
+                },
+                'profile': {
+                    'birth_date': profile.birth_date,
+                    'gender': profile.gender,
+                    'phone_number': profile.phone_number,
+                    'bio': profile.bio,
+                    'profile_picture': profile.profile_picture if profile.profile_picture else None,
+                    'is_profile_complete': profile.is_profile_complete,
+                    'skip_is_profile_complete': profile.skip_is_profile_complete
                 },
                 'token': {
                     'refresh': str(refresh),
@@ -132,3 +141,39 @@ def logout_request(request):
 
     except Exception as e:
         return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def skip_complete_profile_request(request):
+    try:
+        skip_complete_profile_service(request)
+        return Response({'message': 'Skipped completing profile'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def complete_profile_request(request):
+    serializer = CompleteProfileSerializer(data=request.data, context={'user': request.user})
+
+    if serializer.is_valid():
+        try:
+            profile = serializer.save()
+            return Response({
+                'message': 'Profile completed successfully',
+                'profile': {
+                    'birth_date': profile.birth_date,
+                    'gender': profile.gender,
+                    'phone_number': profile.phone_number,
+                    'bio': profile.bio,
+                    'profile_picture': profile.profile_picture.url if profile.profile_picture.url else None,
+                    'is_profile_complete': profile.is_profile_complete,
+                    'skip_is_profile_complete': profile.skip_is_profile_complete
+                }
+            }, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

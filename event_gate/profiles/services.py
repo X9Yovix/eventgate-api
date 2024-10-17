@@ -49,7 +49,12 @@ def login_service(validated_data):
     if not profile.is_verified:
         raise ValueError(["Email is not verified"])
 
-    return user
+    if user is not None:
+        user.last_login = timezone.now()
+        user.save()
+
+        profile = user.profile
+        return [user, profile]
 
 
 def verify_opt_service(validated_data):
@@ -119,3 +124,28 @@ def cancel_account_service(validated_data):
         raise ValueError(["Account is already active"])
 
     user.delete()
+
+
+def skip_complete_profile_service(request):
+    user = request.user
+    profile = user.profile
+
+    profile.skip_is_profile_complete = True
+    profile.save()
+
+
+def complete_profile_service(profile, validated_data):
+    try:
+        profile.birth_date = validated_data.get('birth_date', profile.birth_date)
+        profile.gender = validated_data.get('gender', profile.gender)
+        profile.phone_number = validated_data.get('phone_number', profile.phone_number)
+        profile.bio = validated_data.get('bio', profile.bio)
+        profile.profile_picture = validated_data.get('profile_picture', profile.profile_picture)
+        profile.is_profile_complete = True
+        profile.save()
+
+        print(profile.profile_picture.url)
+        return profile
+
+    except Exception as e:
+        raise ValueError(f"Error updating user or profile: {str(e)}")

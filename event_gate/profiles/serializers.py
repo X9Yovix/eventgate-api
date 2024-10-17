@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from profiles.services import register_service
+from profiles.services import register_service, complete_profile_service
 from django.contrib.auth.models import User
+from profiles.models import Profile
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -32,3 +33,17 @@ class ResendOTPSerializer(serializers.Serializer):
 
 class CancelAccountSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class CompleteProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['birth_date', 'gender', 'phone_number', 'bio', 'profile_picture']
+
+    def save(self):
+        user = self.context['user']
+        profile = user.profile
+        return self.update(profile, self.validated_data)
+
+    def update(self, instance, validated_data):
+        return complete_profile_service(instance, validated_data)
