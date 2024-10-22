@@ -93,7 +93,7 @@ def login_request(request):
                     'gender': profile.gender,
                     'phone_number': profile.phone_number,
                     'bio': profile.bio,
-                    'profile_picture': profile.profile_picture if profile.profile_picture else None,
+                    'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
                     'is_profile_complete': profile.is_profile_complete,
                     'skip_is_profile_complete': profile.skip_is_profile_complete
                 },
