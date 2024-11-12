@@ -12,32 +12,43 @@ def get_all_tags_request(request):
     try:
         tags = get_tags_service()
         return Response({'tags': tags}, status=status.HTTP_200_OK)
+
     except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_event_request(request):
-    serializer = EventSerializer(data=request.data)
+    try:
+        serializer = EventSerializer(data=request.data)
+        if serializer.is_valid():
+            event = serializer.save(user=request.user)
+            return Response({
+                'message': 'Event created successfully',
+                'event': {
+                    'id': event.id,
+                    'event_name': event.event_name,
+                    'location': event.location,
+                    'day': event.day,
+                    'start_time': event.start_time,
+                    'end_time': event.end_time,
+                    'images': [image.image.url for image in event.images.all()],
+                    'tags': [tag.name for tag in event.tags.all()]
+                }
+            }, status=status.HTTP_201_CREATED)
 
-    if serializer.is_valid():
-        event = serializer.save(user=request.user)
-        return Response({
-            'message': 'Event created successfully',
-            'event': {
-                'id': event.id,
-                'event_name': event.event_name,
-                'location': event.location,
-                'day': event.day,
-                'start_time': event.start_time,
-                'end_time': event.end_time,
-                'images': [image.image.url for image in event.images.all()],
-                'tags': [tag.name for tag in event.tags.all()]
-            }
-        }, status=status.HTTP_201_CREATED)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -52,7 +63,9 @@ def get_recent_events_request(request):
             "events": events,
             "total_pages": total_pages,
         }, status=status.HTTP_200_OK)
+
     except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

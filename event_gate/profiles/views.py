@@ -11,9 +11,9 @@ from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
 @api_view(['POST'])
 def register_request(request):
-    serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
+    try:
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
             user = serializer.save()
             return Response({
                 'message': 'Account created successfully',
@@ -24,64 +24,84 @@ def register_request(request):
                     'email': user.email,
                 }
             }, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 def verify_otp_request(request):
-    serializer = VerifyOTPSerializer(data=request.data)
+    try:
+        serializer = VerifyOTPSerializer(data=request.data)
 
-    if serializer.is_valid():
-        try:
+        if serializer.is_valid():
             verify_opt_service(serializer.validated_data)
             return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
 
-        except ValueError as e:
-            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 def resend_otp_request(request):
-    serializer = ResendOTPSerializer(data=request.data)
+    try:
+        serializer = ResendOTPSerializer(data=request.data)
 
-    if serializer.is_valid():
-        try:
+        if serializer.is_valid():
             resend_otp_service(serializer.validated_data)
             return Response({'message': 'New OTP has been sent'}, status=status.HTTP_200_OK)
-        except ValueError as e:
-            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 def cancel_account_request(request):
-    serializer = CancelAccountSerializer(data=request.data)
+    try:
+        serializer = CancelAccountSerializer(data=request.data)
 
-    if serializer.is_valid():
-        try:
+        if serializer.is_valid():
             cancel_account_service(serializer.validated_data)
             return Response({'message': 'Account creation has been canceled'}, status=status.HTTP_200_OK)
-        except ValueError as e:
-            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 def login_request(request):
-    serializer = LoginSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
+    try:
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
             user, profile = login_service(serializer.validated_data)
             refresh = RefreshToken.for_user(user)
 
             return Response({
-                'message': 'Login successful',
+                'message': 'Loged in successfully',
                 'user': {
                     'username': user.username,
                     'first_name': user.first_name,
@@ -103,24 +123,35 @@ def login_request(request):
                 }
             }, status=status.HTTP_200_OK)
 
-        except ValueError as e:
-            return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def protected_request(request):
-    user = request.user
-    return Response({
-        'message': 'This is a protected route',
-        'user': {
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-        }
-    }, status=status.HTTP_200_OK)
+    try:
+        user = request.user
+        return Response({
+            'message': 'This is a protected route',
+            'user': {
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        }, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -139,8 +170,11 @@ def logout_request(request):
 
         return Response({'message': 'Logout successful'}, status=status.HTTP_205_RESET_CONTENT)
 
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['PATCH'])
@@ -149,17 +183,21 @@ def skip_complete_profile_request(request):
     try:
         skip_complete_profile_service(request)
         return Response({'message': 'Skipped completing profile'}, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def complete_profile_request(request):
-    serializer = CompleteProfileSerializer(data=request.data, context={'user': request.user})
+    try:
+        serializer = CompleteProfileSerializer(data=request.data, context={'user': request.user})
 
-    if serializer.is_valid():
-        try:
+        if serializer.is_valid():
             profile = serializer.save()
             return Response({
                 'message': 'Profile completed successfully',
@@ -173,7 +211,11 @@ def complete_profile_request(request):
                     'skip_is_profile_complete': profile.skip_is_profile_complete
                 }
             }, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for field, messages in serializer.errors.items():
+            return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

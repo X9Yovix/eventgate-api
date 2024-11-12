@@ -8,29 +8,24 @@ from django.utils import timezone
 
 
 def register_service(validated_data):
-    try:
-        user = User.objects.create_user(
-            first_name=validated_data.get('first_name'),
-            last_name=validated_data.get('last_name'),
-            username=validated_data.get('username'),
-            email=validated_data.get('email'),
-            password=validated_data.get('password'),
-            is_active=False,
-        )
-        profile = Profile.objects.create(user=user)
-        generate_otp(profile)
-        send_mail(
-            'Your Verification Code',
-            f'Your OTP code is {profile.otp_code}. It is valid for 10 minutes.',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
-
-        return user
-
-    except Exception as e:
-        raise ValueError(f"Error creating user or profile: {str(e)}")
+    user = User.objects.create_user(
+        first_name=validated_data.get('first_name'),
+        last_name=validated_data.get('last_name'),
+        username=validated_data.get('username'),
+        email=validated_data.get('email'),
+        password=validated_data.get('password'),
+        is_active=False,
+    )
+    profile = Profile.objects.create(user=user)
+    generate_otp(profile)
+    send_mail(
+        'Your Verification Code',
+        f'Your OTP code is {profile.otp_code}. It is valid for 10 minutes.',
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+    return user
 
 
 def login_service(validated_data):
@@ -40,14 +35,14 @@ def login_service(validated_data):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        raise ValueError(["User with this username does not exist"])
+        raise ValueError("User with this username does not exist")
 
     if not user.check_password(password):
         raise ValueError("Incorrect password")
 
     profile = Profile.objects.get(user=user)
     if not profile.is_verified:
-        raise ValueError(["Email is not verified"])
+        raise ValueError("Email is not verified")
 
     if user is not None:
         user.last_login = timezone.now()
@@ -64,12 +59,12 @@ def verify_opt_service(validated_data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise ValueError(["User with this email does not exist"])
+        raise ValueError("User with this email does not exist")
 
     profile = user.profile
 
     if profile.is_verified:
-        raise ValueError(["Email is already verified"])
+        raise ValueError("Email is already verified")
 
     if profile.otp_code == otp_code and timezone.now() < profile.otp_expiration:
         profile.is_verified = True
@@ -79,7 +74,7 @@ def verify_opt_service(validated_data):
         user.save()
         return True
 
-    raise ValueError(["Invalid OTP or OTP has expired"])
+    raise ValueError("Invalid OTP or OTP has expired")
 
 
 def resend_otp_service(validated_data):
@@ -88,12 +83,12 @@ def resend_otp_service(validated_data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise ValueError(["User with this email does not exist"])
+        raise ValueError("User with this email does not exist")
 
     profile = user.profile
 
     if profile.is_verified:
-        raise ValueError(["Email is already verified"])
+        raise ValueError("Email is already verified")
 
     generate_otp(profile)
 
@@ -118,10 +113,10 @@ def cancel_account_service(validated_data):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise ValueError(["User with this email does not exist"])
+        raise ValueError("User with this email does not exist")
 
     if user.is_active:
-        raise ValueError(["Account is already active"])
+        raise ValueError("Account is already active")
 
     user.delete()
 
@@ -135,17 +130,13 @@ def skip_complete_profile_service(request):
 
 
 def complete_profile_service(profile, validated_data):
-    try:
-        profile.birth_date = validated_data.get('birth_date', profile.birth_date)
-        profile.gender = validated_data.get('gender', profile.gender)
-        profile.phone_number = validated_data.get('phone_number', profile.phone_number)
-        profile.bio = validated_data.get('bio', profile.bio)
-        profile.profile_picture = validated_data.get('profile_picture', profile.profile_picture)
-        profile.is_profile_complete = True
-        profile.save()
+    profile.birth_date = validated_data.get('birth_date', profile.birth_date)
+    profile.gender = validated_data.get('gender', profile.gender)
+    profile.phone_number = validated_data.get('phone_number', profile.phone_number)
+    profile.bio = validated_data.get('bio', profile.bio)
+    profile.profile_picture = validated_data.get('profile_picture', profile.profile_picture)
+    profile.is_profile_complete = True
+    profile.save()
 
-        print(profile.profile_picture.url)
-        return profile
-
-    except Exception as e:
-        raise ValueError(f"Error updating user or profile: {str(e)}")
+    print(profile.profile_picture.url)
+    return profile
