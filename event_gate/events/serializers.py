@@ -4,24 +4,24 @@ from events.models import Event, EventImage, Tag
 
 class EventSerializer(serializers.ModelSerializer):
     images = serializers.ListField(child=serializers.ImageField(), write_only=True, required=False)
-    tags = serializers.ListField(child=serializers.CharField(), write_only=True)
+    tags = serializers.CharField(write_only=True)
 
     class Meta:
         model = Event
         fields = ['event_name', 'location', 'day', 'start_time', 'end_time', 'images', 'tags']
 
     def validate_tags(self, value):
+        value = [tag.strip() for tag in value.split(',') if tag.strip()]
+
         if not value:
             raise serializers.ValidationError("At least one tag is required")
+
         return value
 
     def create(self, validated_data):
-        print(validated_data)
+        print("Validated data: ", validated_data)
         images = validated_data.pop('images', [])
         tag_names = validated_data.pop('tags', [])
-
-        if isinstance(tag_names, str):
-            tag_names = [tag.strip() for tag in tag_names.split(',')]
 
         event = Event.objects.create(**validated_data)
 
