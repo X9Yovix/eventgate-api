@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from events.serializers import EventSerializer
 from rest_framework.permissions import IsAuthenticated
-from events.services import get_tags_service, get_recent_events_service
+from events.services import get_tags_service, get_recent_events_service, get_event_service
 
 
 @api_view(['GET'])
@@ -62,6 +62,23 @@ def get_recent_events_request(request):
         return Response({
             "events": events,
             "total_pages": total_pages,
+        }, status=status.HTTP_200_OK)
+
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_event_request(request):
+    try:
+        id = request.query_params.get('id')
+        event = get_event_service(id)
+        return Response({
+            "event": event,
         }, status=status.HTTP_200_OK)
 
     except ValueError as e:

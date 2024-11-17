@@ -34,3 +34,17 @@ def get_recent_events_service(page=1, page_size=5):
     } for event in events_page]
 
     return events, total_pages
+
+
+def get_event_service(id):
+    event = Event.objects.get(id=id)
+    return {
+        'id': event.id,
+        'event_name': event.event_name,
+        'location': event.location,
+        'day': event.day,
+        'start_time': event.start_time,
+        'end_time': event.end_time,
+        'images': [image.image.url for image in event.images.all()],
+        'tags': [tag.name for tag in event.tags.all()]
+    }
