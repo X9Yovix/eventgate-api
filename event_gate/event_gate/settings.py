@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # local apps
     'profiles',
     'events',
+    'register',
 ]
 
 MIDDLEWARE = [

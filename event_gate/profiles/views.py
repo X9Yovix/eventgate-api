@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer, CancelAccountSerializer, CompleteProfileSerializer
-from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service, skip_complete_profile_service, complete_profile_service
+from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service, skip_complete_profile_service
 from rest_framework_simplejwt.tokens import RefreshToken
 from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated

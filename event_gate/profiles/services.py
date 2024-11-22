@@ -99,12 +99,14 @@ def resend_otp_service(validated_data):
         [user.email],
         fail_silently=False,
     )
+    return True
 
 
 def generate_otp(profile):
     profile.otp_code = str(uuid.uuid4().int)[:6]
     profile.otp_expiration = timezone.now() + timedelta(minutes=10)
     profile.save()
+    return True
 
 
 def cancel_account_service(validated_data):
@@ -119,6 +121,7 @@ def cancel_account_service(validated_data):
         raise ValueError("Account is already active")
 
     user.delete()
+    return True
 
 
 def skip_complete_profile_service(request):
@@ -127,6 +130,7 @@ def skip_complete_profile_service(request):
 
     profile.skip_is_profile_complete = True
     profile.save()
+    return True
 
 
 def complete_profile_service(profile, validated_data):
