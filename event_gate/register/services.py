@@ -1,13 +1,17 @@
-from django.shortcuts import get_object_or_404
 from register.models import Interested, RequestedToJoin, RequestStatus
 from events.models import Event
+from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def interested_in_event(user, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
     if event.user == user:
-        raise ValueError("You cant show interest in your own event")
+        raise ValueError("You can't show interest in your own event")
     if Interested.objects.filter(user=user, event=event).exists():
         raise ValueError("Already interested in this event")
     interested = Interested.objects.create(user=user, event=event)
@@ -15,7 +19,10 @@ def interested_in_event(user, event_id):
 
 
 def remove_interest(user, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
     interest = Interested.objects.filter(user=user, event=event).first()
     if not interest:
         raise ValueError("You still haven't shown interest in this event")
@@ -24,14 +31,16 @@ def remove_interest(user, event_id):
 
 
 def request_to_join_event(user, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
     if event.user == user:
-        raise ValueError("You cant request to join your own event")
+        raise ValueError("You can't request to join your own event")
     if RequestedToJoin.objects.filter(user=user, event=event).exists() and RequestedToJoin.objects.filter(user=user, event=event, status=RequestStatus.PENDING.name).exists():
         raise ValueError("Already requested to join this event")
     if RequestedToJoin.objects.filter(user=user, event=event).exists() and RequestedToJoin.objects.filter(user=user, event=event, status=RequestStatus.CANCELLED.name).exists():
         requested = RequestedToJoin.objects.filter(user=user, event=event).first()
-        print(requested)
         requested.status = RequestStatus.PENDING.name
         requested.save()
         return True
@@ -40,7 +49,10 @@ def request_to_join_event(user, event_id):
 
 
 def cancel_request(user, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
     request = RequestedToJoin.objects.filter(user=user, event=event).first()
     if not request:
         raise ValueError("Request to join event not found")
@@ -52,9 +64,16 @@ def cancel_request(user, event_id):
 
 
 def accept_request(auth_user, user_id, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
     if event.user != auth_user:
         raise ValueError("Only the event creator can accept requests")
+    try:
+        User.objects.get(id=user_id)
+    except ObjectDoesNotExist:
+        raise ValueError("User not found")
     request = RequestedToJoin.objects.filter(event=event, user=user_id, status=RequestStatus.PENDING.name).first()
     if not request:
         raise ValueError("No pending requests found to accept")
@@ -65,7 +84,10 @@ def accept_request(auth_user, user_id, event_id):
 
 
 def check_user_event_status(user, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = Event.objects.get(id=event_id)
+    except ObjectDoesNotExist:
+        raise ValueError("Event not found")
 
     is_interested = Interested.objects.filter(user=user, event=event).exists()
 

@@ -13,7 +13,7 @@ def interested_in_event_request(request):
     try:
         interested_in_event(user, event_id)
         return Response({
-            'message': 'Interest in event created successfully'
+            'message': 'Interest in event shown successfully'
         }, status=status.HTTP_201_CREATED)
 
     except ValueError as e:

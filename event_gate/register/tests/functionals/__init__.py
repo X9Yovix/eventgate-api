@@ -1,0 +1,3 @@
+
+from register.tests.functionals.interest import InterestedInEventFunctionalTests, RemoveInterestFunctionalTests
+from register.tests.functionals.request_to_join import RequestToJoinEventFunctionalTests, CancelRequestFunctionalTests, AcceptRequestFunctionalTests
