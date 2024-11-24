@@ -30,8 +30,10 @@ SECRET_KEY = 'django-insecure-$9!sqd1ks5wpj(*583!sj-q_&)+)@d15clrvyr2#&%#)m#ra7^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    '10.0.2.2',
+    '127.0.0.1',
+]
 
 # Application definition
 
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     # local apps
     'profiles',
+    'events',
+    'register',
 ]
 
 MIDDLEWARE = [
@@ -155,7 +159,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # added settings
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
@@ -176,7 +180,12 @@ REST_FRAMEWORK = {
     )
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
-    "BLACKLIST_AFTER_ROTATION": True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(weeks=1),
+    'BLACKLIST_AFTER_ROTATION': True,
 }
+
+CORS_ALLOWED_ORIGINS = [
+    os.getenv('IONIC_WEB_URL', 'http://localhost:8100'),
+    # os.getenv('ANDROID_EM', 'http://10.0.2.2'),
+]
