@@ -30,7 +30,6 @@ class InterestedInEventUnitTest(TestCase):
     def test_interested_in_event_not_found(self):
         with self.assertRaises(ValueError) as context:
             interested_in_event(self.user2, 999999999)
-
         self.assertEqual(str(context.exception), "Event not found")
         self.assertEqual(Interested.objects.count(), 0)
 
@@ -38,14 +37,12 @@ class InterestedInEventUnitTest(TestCase):
         Interested.objects.create(user=self.user2, event=self.event)
         with self.assertRaises(ValueError) as context:
             interested_in_event(self.user2, self.event.id)
-
         self.assertEqual(str(context.exception), "Already interested in this event")
         self.assertEqual(Interested.objects.count(), 1)
 
     def test_interested_in_own_event(self):
         with self.assertRaises(ValueError) as context:
             interested_in_event(self.user1, self.event.id)
-
         self.assertEqual(str(context.exception), "You can't show interest in your own event")
         self.assertEqual(Interested.objects.count(), 0)
 
@@ -79,5 +76,4 @@ class RemoveInterestUnitTest(TestCase):
     def test_remove_interest_event_not_found(self):
         with self.assertRaises(ValueError) as context:
             remove_interest(self.user1, 999999999)
-
         self.assertEqual(str(context.exception), "Event not found")

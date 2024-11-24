@@ -100,7 +100,6 @@ class CancelRequestFunctionalTests(APITestCase):
     def test_cancel_request_in_cancelled_state(self):
         RequestedToJoin.objects.create(user=self.user2, event=self.event, status=RequestStatus.CANCELLED.name)
         self.authenticate_user(self.user2)
-
         response = self.client.delete(f'/api/register/request/cancel?event_id={self.event.id}')
         self.assertEqual(response.status_code, 400)
         self.assertIn("Only pending requests can be cancelled", response.data['error'])
@@ -108,7 +107,6 @@ class CancelRequestFunctionalTests(APITestCase):
     def test_cancel_request_in_accepted_state(self):
         RequestedToJoin.objects.create(user=self.user2, event=self.event, status=RequestStatus.ACCEPTED.name)
         self.authenticate_user(self.user2)
-
         response = self.client.delete(f'/api/register/request/cancel?event_id={self.event.id}')
         self.assertEqual(response.status_code, 400)
         self.assertIn("Only pending requests can be cancelled", response.data['error'])
@@ -142,7 +140,6 @@ class AcceptRequestFunctionalTests(APITestCase):
         response = self.client.patch(f'/api/register/request/accept?event_id={self.event.id}&user_id={self.user2.id}')
         self.assertEqual(response.status_code, 200)
         self.assertIn("Request accepted successfully", response.data['message'])
-
         updated_request = RequestedToJoin.objects.get(user=self.user2, event=self.event)
         self.assertEqual(updated_request.status, RequestStatus.ACCEPTED.name)
 
@@ -158,7 +155,7 @@ class AcceptRequestFunctionalTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("User not found", response.data['error'])
 
-    def test_accept_request_as_creator(self):
+    def test_accept_request_as_non_creator(self):
         RequestedToJoin.objects.create(user=self.user2, event=self.event, status=RequestStatus.PENDING.name)
         self.authenticate_user(self.user2)
         response = self.client.patch(f'/api/register/request/accept?event_id={self.event.id}&user_id={self.user2.id}')

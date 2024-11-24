@@ -25,7 +25,6 @@ class RequestToJoinEventUnitTest(TestCase):
         result = request_to_join_event(self.user2, self.event.id)
         self.assertTrue(result)
         self.assertEqual(RequestedToJoin.objects.count(), 1)
-
         request = RequestedToJoin.objects.first()
         self.assertEqual(request.user, self.user2)
         self.assertEqual(request.event, self.event)
@@ -40,14 +39,12 @@ class RequestToJoinEventUnitTest(TestCase):
         RequestedToJoin.objects.create(user=self.user2, event=self.event, status=RequestStatus.PENDING.name)
         with self.assertRaises(ValueError) as context:
             request_to_join_event(self.user2, self.event.id)
-
         self.assertEqual(str(context.exception), "Already requested to join this event")
         self.assertEqual(RequestedToJoin.objects.count(), 1)
 
     def test_request_to_join_own_event(self):
         with self.assertRaises(ValueError) as context:
             request_to_join_event(self.user1, self.event.id)
-
         self.assertEqual(str(context.exception), "You can't request to join your own event")
         self.assertEqual(RequestedToJoin.objects.count(), 0)
 
@@ -131,7 +128,7 @@ class AcceptRequestUnitTest(TestCase):
             accept_request(self.user1, 999999999, self.event.id)
         self.assertEqual(str(context.exception), "User not found")
 
-    def test_accept_request_as_creator(self):
+    def test_accept_request_as_non_creator(self):
         RequestedToJoin.objects.create(user=self.user2, event=self.event, status=RequestStatus.PENDING.name)
         with self.assertRaises(ValueError) as context:
             accept_request(self.user2, self.user2.id, self.event.id)
