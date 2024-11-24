@@ -70,3 +70,38 @@ unit-test-register:
     - python manage.py test register.tests.units --keepdb
   after_script:
     - echo "Unit tests register completed successfully"
+
+
+functional-test-register:
+  stage: tests
+  extends: .job-dependency
+  variables:
+    DB_NAME: "event_gate_test"
+    DB_USER: "root"
+    DB_PASSWORD: ""
+    DB_HOST: "db"
+    DB_PORT: "3306"
+  services:
+    - name: mysql:latest
+      alias: db
+      variables:
+        MYSQL_DATABASE: $DB_NAME
+        MYSQL_ROOT_PASSWORD: $DB_PASSWORD
+        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+  before_script:
+    - apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev gcc default-mysql-client
+    - pip install --upgrade pip
+    - pip install -r ./event_gate/requirements.txt
+    - |
+      until mysqladmin ping -h "$DB_HOST" --silent; do
+        echo "Waiting for MySQL to be ready..."
+        sleep 2
+      done
+    - python ./event_gate/manage.py migrate
+    - python ./event_gate/manage.py createcachetable
+  script:
+    - echo "Starting Functional Tests Register Module"
+    - cd event_gate
+    - python manage.py test register.tests.functionals --keepdb
+  after_script:
+    - echo "Functional tests register completed successfully"
