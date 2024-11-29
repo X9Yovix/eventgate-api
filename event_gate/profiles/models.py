@@ -8,6 +8,7 @@ User._meta.get_field('email')._unique = True
 
 class Profile(TimeStampedModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    firebase_uid = models.CharField(max_length=128, null=True, blank=True)
     birth_date = models.DateField(null=True)
     gender = models.CharField(max_length=10, null=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True)

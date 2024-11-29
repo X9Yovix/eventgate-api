@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
+from firebase_admin import auth
 
 
 @api_view(['POST'])
@@ -100,6 +101,8 @@ def login_request(request):
             user, profile = login_service(serializer.validated_data)
             refresh = RefreshToken.for_user(user)
 
+            firebase_token = auth.create_custom_token(str(user.id))
+
             return Response({
                 'message': 'Loged in successfully',
                 'user': {
@@ -120,6 +123,7 @@ def login_request(request):
                 'token': {
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
+                    'firebase_token': firebase_token.decode('utf-8')
                 }
             }, status=status.HTTP_200_OK)
 
