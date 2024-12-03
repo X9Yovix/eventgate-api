@@ -54,8 +54,7 @@ unit-test-register:
         MYSQL_ROOT_PASSWORD: $DB_PASSWORD
         MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
   before_script:
-    - mkdir -p secrets
-    - touch secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json
+    - echo "CI = True" >> .env
     - apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev gcc default-mysql-client
     - pip install --upgrade pip
     - pip install -r ./event_gate/requirements.txt
@@ -91,8 +90,7 @@ functional-test-register:
         MYSQL_ROOT_PASSWORD: $DB_PASSWORD
         MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
   before_script:
-    - mkdir -p secrets
-    - touch secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json
+    - echo "CI = True" >> .env
     - apt-get update && apt-get install -y python3-dev default-libmysqlclient-dev gcc default-mysql-client
     - pip install --upgrade pip
     - pip install -r ./event_gate/requirements.txt

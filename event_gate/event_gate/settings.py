@@ -193,5 +193,8 @@ CORS_ALLOWED_ORIGINS = [
     # os.getenv('ANDROID_EM', 'http://10.0.2.2'),
 ]
 
-cred = credentials.Certificate('secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json')
-firebase_admin.initialize_app(cred)
+CI_PIPELINE = os.getenv('CI', False)
+
+if CI_PIPELINE == 'False':
+    cred = credentials.Certificate('secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json')
+    firebase_admin.initialize_app(cred)
