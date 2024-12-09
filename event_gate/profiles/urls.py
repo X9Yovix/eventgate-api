@@ -8,7 +8,8 @@ from profiles.views import (
     logout_request,
     protected_request,
     skip_complete_profile_request,
-    complete_profile_request
+    complete_profile_request,
+    basic_user_data_request
 )
 
 urlpatterns = [
@@ -21,4 +22,5 @@ urlpatterns = [
     path('skip-complete-profile', skip_complete_profile_request, name='skip_complete_profile_request'),
     path('complete-profile', complete_profile_request, name='complete_profile_request'),
     path('protected', protected_request, name='protected_route_request'),
+    path('user/basic', basic_user_data_request, name='basic_user_data_request'),
 ]

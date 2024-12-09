@@ -2,11 +2,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from profiles.serializers import RegisterSerializer, LoginSerializer, VerifyOTPSerializer, ResendOTPSerializer, CancelAccountSerializer, CompleteProfileSerializer
-from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service, skip_complete_profile_service
+from profiles.services import verify_opt_service, resend_otp_service, cancel_account_service, skip_complete_profile_service, basic_user_data_service
 from rest_framework_simplejwt.tokens import RefreshToken
 from profiles.services import login_service
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
+from firebase_admin import auth
 
 
 @api_view(['POST'])
@@ -100,9 +101,12 @@ def login_request(request):
             user, profile = login_service(serializer.validated_data)
             refresh = RefreshToken.for_user(user)
 
+            firebase_token = auth.create_custom_token(str(user.id))
+
             return Response({
                 'message': 'Loged in successfully',
                 'user': {
+                    'id': user.id,
                     'username': user.username,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
@@ -120,6 +124,7 @@ def login_request(request):
                 'token': {
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
+                    'firebase_token': firebase_token.decode('utf-8')
                 }
             }, status=status.HTTP_200_OK)
 
@@ -214,6 +219,22 @@ def complete_profile_request(request):
 
         for field, messages in serializer.errors.items():
             return Response({'error': messages[0]}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def basic_user_data_request(request):
+    try:
+        user_id = request.query_params.get('user_id')
+        user = basic_user_data_service(user_id)
+        return Response({
+            'user': user
+        }, status=status.HTTP_200_OK)
+
     except ValueError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
