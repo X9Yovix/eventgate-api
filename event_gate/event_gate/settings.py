@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
+import firebase_admin
+from firebase_admin import credentials
+
 
 load_dotenv()
 
@@ -189,3 +192,9 @@ CORS_ALLOWED_ORIGINS = [
     os.getenv('IONIC_WEB_URL', 'http://localhost:8100'),
     # os.getenv('ANDROID_EM', 'http://10.0.2.2'),
 ]
+
+CI_PIPELINE = os.getenv('CI', False)
+
+if CI_PIPELINE == 'False':
+    cred = credentials.Certificate('secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json')
+    firebase_admin.initialize_app(cred)

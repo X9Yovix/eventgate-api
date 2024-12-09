@@ -144,3 +144,19 @@ def complete_profile_service(profile, validated_data):
 
     print(profile.profile_picture.url)
     return profile
+
+
+def basic_user_data_service(user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=user.id)
+        return {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "profile_picture": profile.profile_picture.url if profile.profile_picture else None,
+        }
+    except User.DoesNotExist:
+        raise ValueError("User with this id does not exist")
+    except Profile.DoesNotExist:
+        raise ValueError("Profile with this user does not exist")
