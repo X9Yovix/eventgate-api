@@ -194,6 +194,12 @@ CORS_ALLOWED_ORIGINS = [
 
 CI_PIPELINE = os.getenv('CI', False)
 
-if CI_PIPELINE == 'False':
-    cred = credentials.Certificate('secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json')
+# if CI_PIPELINE == 'False':
+#    cred = credentials.Certificate('secrets/glsi-5-project-firebase-adminsdk-ltaft-d25aacf340.json')
+#    firebase_admin.initialize_app(cred)
+
+firebase_credentials_path = os.getenv('FIREBASE_CREDENTIALS_PATH')
+
+if CI_PIPELINE == 'False' and firebase_credentials_path:
+    cred = credentials.Certificate(firebase_credentials_path)
     firebase_admin.initialize_app(cred)
